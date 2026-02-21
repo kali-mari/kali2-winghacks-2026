@@ -1,25 +1,32 @@
 import React from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 
-const app = () => {
+export default function HomeScreen() {
   return (
-    <View style={styles.container}> 
-      <Text style={styles.text}>Kali^2</Text>
+    <View style={styles.container}>
+      <Text style={styles.titleText}>Kali^2</Text>
+      <Text style={styles.subtitleText}>Winghacks 2026</Text>
     </View>
   )
 }
 
-export default app
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: 'column',
+    backgroundColor: '#f5e6f5',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  text: {
-    color: 'white',
-    fontSize: 42,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  }
+  titleText: {
+    fontFamily: 'PressStart2P_400Regular',
+    fontSize: 24,
+    color: '#5a4a6a',
+    marginBottom: 12,
+  },
+  subtitleText: {
+    fontFamily: 'Silkscreen_400Regular',
+    fontSize: 14,
+    color: '#9a8aaa',
+    letterSpacing: 2,
+  },
 })
