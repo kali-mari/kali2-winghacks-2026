@@ -1,6 +1,7 @@
 import 'react-native-reanimated';
 
 // app/_layout.tsx
+import { initUser } from '@/firebase/db';
 import { PressStart2P_400Regular, useFonts } from '@expo-google-fonts/press-start-2p';
 import { Silkscreen_400Regular } from '@expo-google-fonts/silkscreen';
 import { Stack } from 'expo-router';
@@ -18,6 +19,10 @@ export default function RootLayout() {
   useEffect(() => {
     if (fontsLoaded) SplashScreen.hideAsync();
   }, [fontsLoaded]);
+
+  useEffect(() => {
+    initUser()
+  }, [])
 
   if (!fontsLoaded) return null;
 
