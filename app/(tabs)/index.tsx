@@ -13,20 +13,20 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5e6f5',
+    backgroundColor: '#bae1ff',
     justifyContent: 'center',
     alignItems: 'center',
   },
   titleText: {
     fontFamily: 'PressStart2P_400Regular',
     fontSize: 24,
-    color: '#5a4a6a',
+    color: '#2a3a5a',
     marginBottom: 12,
   },
   subtitleText: {
     fontFamily: 'Silkscreen_400Regular',
     fontSize: 14,
-    color: '#9a8aaa',
+    color: '#6a7a9a',
     letterSpacing: 2,
   },
 })
