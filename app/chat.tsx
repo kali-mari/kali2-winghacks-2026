@@ -2,13 +2,13 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 type Message = {
@@ -49,7 +49,6 @@ export default function ChatScreen() {
   const scrollViewRef = useRef<ScrollView>(null);
 
   useEffect(() => {
-    // Auto-scroll to bottom when new messages arrive
     setTimeout(() => {
       scrollViewRef.current?.scrollToEnd({ animated: true });
     }, 100);
@@ -72,87 +71,63 @@ export default function ChatScreen() {
     const sendWithRetry = async (retries = 3, delayMs = 1000) => {
       try {
         const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
-        console.log(
-          "API Key loaded:",
-          apiKey ? "✓ Key exists" : "✗ No key found",
-        );
-
-        if (!apiKey) {
-          throw new Error(
-            "Gemini API key not configured. Check your .env file.",
-          );
-        }
+        if (!apiKey) throw new Error("Gemini API key not configured. Check your .env file.");
 
         const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({
-          model: "gemini-2.5-flash",
-        });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
         const chat = model.startChat({
           systemInstruction: {
+            role: "user",
             parts: [{ text: HEALTH_SYSTEM_PROMPT }],
           },
           history: messages
-            .filter((m) => m.sender !== "assistant" || m.id !== "1") // Skip initial greeting in history
+            .filter((m) => m.sender !== "assistant" || m.id !== "1")
             .map((m) => ({
               role: m.sender === "user" ? "user" : "model",
               parts: [{ text: m.text }],
             })),
         });
 
-        console.log("Sending message to Gemini...");
         const result = await chat.sendMessage(inputText);
         const responseText = result.response.text();
 
-        const assistantMessage: Message = {
-          id: Date.now().toString(),
-          text: responseText,
-          sender: "assistant",
-          timestamp: Date.now(),
-        };
-
-        setMessages((prev) => [...prev, assistantMessage]);
+        setMessages((prev) => [
+          ...prev,
+          { id: Date.now().toString(), text: responseText, sender: "assistant", timestamp: Date.now() },
+        ]);
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : String(error);
-        console.error("Chat error details:", errorMessage);
+        const errorMessage = error instanceof Error ? error.message : String(error);
 
-        // Check if it's a quota exceeded error
         if (errorMessage.includes("429") || errorMessage.includes("quota")) {
           if (retries > 0) {
-            console.log(
-              `Quota exceeded. Retrying in ${delayMs}ms... (${retries} retries left)`,
-            );
-
-            // Add a status message
-            const retryMessage: Message = {
-              id: Date.now().toString(),
-              text: `⏳ API quota exceeded. Retrying in ${Math.ceil(delayMs / 1000)}s... (${retries} attempts left)`,
-              sender: "assistant",
-              timestamp: Date.now(),
-            };
-            setMessages((prev) => [...prev, retryMessage]);
-
-            // Wait and retry with exponential backoff
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: Date.now().toString(),
+                text: `⏳ API quota exceeded. Retrying in ${Math.ceil(delayMs / 1000)}s... (${retries} attempts left)`,
+                sender: "assistant",
+                timestamp: Date.now(),
+              },
+            ]);
             await new Promise((resolve) => setTimeout(resolve, delayMs));
             return sendWithRetry(retries - 1, delayMs * 2);
           } else {
-            const assistantMessage: Message = {
-              id: Date.now().toString(),
-              text: "Sorry! The free tier API quota is exhausted. Please try again in a few hours, or upgrade to a paid plan at https://ai.google.dev/pricing",
-              sender: "assistant",
-              timestamp: Date.now(),
-            };
-            setMessages((prev) => [...prev, assistantMessage]);
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: Date.now().toString(),
+                text: "Sorry! The free tier API quota is exhausted. Please try again in a few hours.",
+                sender: "assistant",
+                timestamp: Date.now(),
+              },
+            ]);
           }
         } else {
-          const assistantMessage: Message = {
-            id: Date.now().toString(),
-            text: `Error: ${errorMessage}`,
-            sender: "assistant",
-            timestamp: Date.now(),
-          };
-          setMessages((prev) => [...prev, assistantMessage]);
+          setMessages((prev) => [
+            ...prev,
+            { id: Date.now().toString(), text: `Error: ${errorMessage}`, sender: "assistant", timestamp: Date.now() },
+          ]);
         }
       } finally {
         setLoading(false);
@@ -164,14 +139,13 @@ export default function ChatScreen() {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => router.push("/")}
-      >
-        <Text style={styles.backText}>← Back</Text>
-      </TouchableOpacity>
-
-      <Text style={styles.title}>HEALTH CHAT</Text>
+      {/* Header row: back button + title side by side */}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.push("/")}>
+          <Text style={styles.backText}>← Back</Text>
+        </TouchableOpacity>
+        <Text style={styles.title}>HEALTH CHAT</Text>
+      </View>
 
       <ScrollView
         ref={scrollViewRef}
@@ -184,26 +158,15 @@ export default function ChatScreen() {
             key={message.id}
             style={[
               styles.messageBubble,
-              message.sender === "user"
-                ? styles.userMessage
-                : styles.assistantMessage,
+              message.sender === "user" ? styles.userMessage : styles.assistantMessage,
             ]}
           >
-            <Text
-              style={[
-                styles.messageText,
-                message.sender === "user"
-                  ? styles.userMessageText
-                  : styles.assistantMessageText,
-              ]}
-            >
-              {message.text}
-            </Text>
+            <Text style={styles.messageText}>{message.text}</Text>
           </View>
         ))}
         {loading && (
           <View style={[styles.messageBubble, styles.assistantMessage]}>
-            <ActivityIndicator color="#c9184a" size="small" />
+            <ActivityIndicator color="#2a3a5a" size="small" />
           </View>
         )}
       </ScrollView>
@@ -211,19 +174,20 @@ export default function ChatScreen() {
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Ask me anything about your cycle or health..."
-          placeholderTextColor="#999"
+          placeholder="Ask about your cycle..."
+          placeholderTextColor="#6a7a9a"
           value={inputText}
           onChangeText={setInputText}
           onSubmitEditing={sendMessage}
           editable={!loading}
+          multiline
         />
         <TouchableOpacity
-          style={[styles.sendButton, loading && styles.sendButtonDisabled]}
+          style={[styles.sendButton, (loading || !inputText.trim()) && styles.sendButtonDisabled]}
           onPress={sendMessage}
           disabled={loading || !inputText.trim()}
         >
-          <Text style={styles.sendButtonText}>Send</Text>
+          <Text style={styles.sendButtonText}>SEND</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -234,99 +198,108 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#bae1ff",
-    paddingTop: 50,
-    paddingHorizontal: 0,
+    paddingTop: 48,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 24,
+    marginBottom: 16,
+    gap: 16,
   },
   backButton: {
-    paddingHorizontal: 16,
+    borderWidth: 3,
+    borderColor: "#2a3a5a",
+    borderRightWidth: 5,
+    borderBottomWidth: 5,
     paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: "#ffffba",
   },
   backText: {
-    fontSize: 14,
+    fontFamily: "PressStart2P_400Regular",
+    fontSize: 8,
     color: "#2a3a5a",
-    fontWeight: "700",
   },
   title: {
-    fontSize: 18,
     fontFamily: "PressStart2P_400Regular",
-    paddingHorizontal: 16,
-    marginVertical: 12,
+    fontSize: 14,
     color: "#2a3a5a",
+    flexShrink: 1,
   },
   messagesContainer: {
     flex: 1,
-    paddingHorizontal: 12,
+    width: "100%",
+    paddingHorizontal: 16,
   },
   messagesContent: {
     paddingVertical: 8,
+    gap: 10,
   },
   messageBubble: {
-    marginVertical: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 8,
-    maxWidth: "88%",
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderWidth: 3,
+    borderColor: "#2a3a5a",
+    maxWidth: "85%",
   },
   userMessage: {
     alignSelf: "flex-end",
-    backgroundColor: "#c9184a",
-    borderWidth: 2,
-    borderColor: "#2a3a5a",
+    backgroundColor: "#ffb3e6",
+    borderRightWidth: 5,
+    borderBottomWidth: 5,
   },
   assistantMessage: {
     alignSelf: "flex-start",
     backgroundColor: "#ffffba",
-    borderWidth: 2,
-    borderColor: "#2a3a5a",
+    borderRightWidth: 5,
+    borderBottomWidth: 5,
   },
   messageText: {
-    fontSize: 12,
-    lineHeight: 18,
-  },
-  userMessageText: {
-    color: "#fff",
-    fontWeight: "500",
-  },
-  assistantMessageText: {
+    fontFamily: "PressStart2P_400Regular",
+    fontSize: 7,
     color: "#2a3a5a",
-    fontWeight: "500",
+    lineHeight: 14,
   },
   inputContainer: {
     flexDirection: "row",
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    paddingBottom: 16,
-    backgroundColor: "#bae1ff",
+    width: "100%",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    paddingBottom: 24,
     gap: 8,
-    alignItems: "center",
+    alignItems: "flex-end",
   },
   input: {
     flex: 1,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     backgroundColor: "#fff",
-    borderRadius: 6,
-    fontSize: 12,
-    color: "#333",
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: "#2a3a5a",
-    height: 40,
+    borderRightWidth: 5,
+    borderBottomWidth: 5,
+    fontFamily: "PressStart2P_400Regular",
+    fontSize: 7,
+    color: "#2a3a5a",
+    minHeight: 44,
   },
   sendButton: {
-    backgroundColor: "#ffb3e6",
+    backgroundColor: "#ffffba",
     paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6,
-    borderWidth: 2,
+    paddingVertical: 12,
+    borderWidth: 3,
     borderColor: "#2a3a5a",
+    borderRightWidth: 5,
+    borderBottomWidth: 5,
     justifyContent: "center",
   },
   sendButtonText: {
+    fontFamily: "PressStart2P_400Regular",
+    fontSize: 8,
     color: "#2a3a5a",
-    fontWeight: "700",
-    fontSize: 12,
   },
   sendButtonDisabled: {
-    opacity: 0.5,
+    opacity: 0.4,
   },
 });

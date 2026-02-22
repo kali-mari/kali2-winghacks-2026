@@ -8,6 +8,12 @@ export default function HomeScreen() {
       <Text style={styles.title}>FlowFriend</Text>
       <Text style={styles.subtitle}>WITH YOUR CYCLE COMPANION, FLOPPY!</Text>
 
+      <Image
+        source={require("../assets/images/floppy_happy.png")}
+        style={styles.mascot}
+        contentFit="contain"
+      />
+
       <View style={styles.buttonGrid}>
         <TouchableOpacity
           style={[styles.button, { backgroundColor: "#ffffba" }]}
@@ -58,7 +64,7 @@ export default function HomeScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: "#ffb3e6" }]}
+          style={[styles.button, { backgroundColor: "#ffffba" }]}
           onPress={() => router.push("/prediction")}
         >
           <Text style={styles.buttonEmoji}>🔮</Text>
@@ -66,19 +72,13 @@ export default function HomeScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: "#c9f0dd" }]}
+          style={[styles.button, { backgroundColor: "#ffffba" }]}
           onPress={() => router.push("/chat")}
         >
           <Text style={styles.buttonEmoji}>💬</Text>
           <Text style={styles.buttonText}>CHAT</Text>
         </TouchableOpacity>
       </View>
-
-      <Image
-        source={require("../assets/images/floppy_happy.gif")}
-        style={styles.mascot}
-        contentFit="contain"
-      />
     </View>
   );
 }
@@ -104,8 +104,14 @@ const styles = StyleSheet.create({
     color: "#6a7a9a",
     letterSpacing: 3,
     textAlign: "center",
-    marginBottom: 24,
+    marginBottom: 8,
   },
+  mascot: {
+    width: 120,
+    height: 120,
+    marginBottom: 16,
+    imageRendering: "pixelated",
+  } as any,
   buttonGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -134,10 +140,5 @@ const styles = StyleSheet.create({
     fontFamily: "PressStart2P_400Regular",
     fontSize: 10,
     color: "#2a3a5a",
-  },
-  mascot: {
-    width: 150,
-    height: 150,
-    marginTop: 32,
   },
 });
