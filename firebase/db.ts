@@ -1,6 +1,7 @@
 import { signInAnonymously } from 'firebase/auth'
+import { off, onValue, ref } from 'firebase/database'
 import { addDoc, collection, doc, getDoc, getDocs, orderBy, query, serverTimestamp, setDoc } from 'firebase/firestore'
-import { auth, db } from './config'
+import { auth, db, rtdb } from './config'
 
 /* INIT USER (ANON) */
 export const initUser = async () => {
@@ -26,27 +27,59 @@ export const saveUser = async (userId: string, name: string) => {
 
 /* ADD ENTRY */
 export type Entry = {
-  flow?: 'none' | 'light_spotting' | 'moderate' | 'heavy' | 'extra_heavy' | null
-  sleep?: 'no_battery' | 'still_sleepy' | 'decent' | 'feeling_good' | 'fully_powered' | null
-  mood?: 'super_sad' | 'extra_angry' | 'only_okay' | 'comfy_cozy' | 'super_duper' | null
-  pain?: 'none' | 'back_pain' | 'stomach_cramps' | 'pelvic_pain' | 'headaches' | null
+  flow?: 'none' | 'light_spotting' | 'moderate' | 'heavy' | 'extra_heavy' | 'not_recorded'
+  sleep?: 'no_battery' | 'still_sleepy' | 'decent' | 'feeling_good' | 'fully_powered' | 'not_recorded'
+  mood?: 'super_sad' | 'extra_angry' | 'only_okay' | 'comfy_cozy' | 'super_duper' | 'not_recorded'
+  pain?: 'none' | 'back_pain' | 'stomach_cramps' | 'pelvic_pain' | 'headaches' | 'not_recorded'
 }
 
 export const addEntry = async (userId: string, entry: Entry) => {
-  const ref = collection(db, 'users', userId, 'entries')
-  await addDoc(ref, {
-    flow: entry.flow ?? null,
-    sleep: entry.sleep ?? null,
-    mood: entry.mood ?? null,
-    pain: entry.pain ?? null,
+  const entriesRef = collection(db, 'users', userId, 'entries')
+  await addDoc(entriesRef, {
+    flow: entry.flow ?? 'not_recorded',
+    sleep: entry.sleep ?? 'not_recorded',
+    mood: entry.mood ?? 'not_recorded',
+    pain: entry.pain ?? 'not_recorded',
     date: serverTimestamp(),
   })
 }
 
 /* GET ENTRIES */
 export const getEntries = async (userId: string) => {
-  const ref = collection(db, 'users', userId, 'entries')
-  const q = query(ref, orderBy('date', 'desc'))
+  const entriesRef = collection(db, 'users', userId, 'entries')
+  const q = query(entriesRef, orderBy('date', 'desc'))
   const snap = await getDocs(q)
   return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+}
+
+/* LISTEN TO ESP32 DATA FROM REALTIME DATABASE */
+export type DeviceData = {
+  flow: string
+  mood: string
+  pain: string
+  sleep: string
+  timestamp: string
+}
+
+export const listenToDevice = (callback: (data: DeviceData) => void) => {
+  const deviceRef = ref(rtdb, '/')
+  onValue(deviceRef, (snapshot) => {
+    const data = snapshot.val()
+    if (data) callback(data)
+  })
+  // return cleanup function to stop listening
+  return () => off(deviceRef)
+}
+
+/* SAVE ESP32 ENTRY TO FIRESTORE */
+export const saveDeviceEntry = async (userId: string, deviceData: DeviceData) => {
+  const entriesRef = collection(db, 'users', userId, 'entries')
+  await addDoc(entriesRef, {
+    flow: deviceData.flow ?? 'not_recorded',
+    sleep: deviceData.sleep ?? 'not_recorded',
+    mood: deviceData.mood ?? 'not_recorded',
+    pain: deviceData.pain ?? 'not_recorded',
+    date: serverTimestamp(),
+    source: 'device',
+  })
 }

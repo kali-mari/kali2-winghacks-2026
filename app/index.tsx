@@ -1,6 +1,7 @@
+import { Image } from 'expo-image'
 import { router } from 'expo-router'
 import React from 'react'
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 export default function HomeScreen() {
   return (
@@ -15,7 +16,11 @@ export default function HomeScreen() {
           style={[styles.button, { backgroundColor: '#ffffba' }]}
           onPress={() => router.push('/flow')}
         >
-          <Image source={require('../assets/images/flow.png')} style={styles.buttonImage} />
+          <Image
+            source={require('../assets/images/flow.png')}
+            style={styles.buttonImage}
+            contentFit="contain"
+          />
           <Text style={styles.buttonText}>FLOW</Text>
         </TouchableOpacity>
 
@@ -23,7 +28,11 @@ export default function HomeScreen() {
           style={[styles.button, { backgroundColor: '#ffffba' }]}
           onPress={() => router.push('/pain')}
         >
-          <Image source={require('../assets/images/cramps.png')} style={styles.buttonImage} />
+          <Image
+            source={require('../assets/images/cramps.png')}
+            style={styles.buttonImage}
+            contentFit="contain"
+          />
           <Text style={styles.buttonText}>PAIN</Text>
         </TouchableOpacity>
 
@@ -31,7 +40,11 @@ export default function HomeScreen() {
           style={[styles.button, { backgroundColor: '#ffffba' }]}
           onPress={() => router.push('/sleep')}
         >
-          <Image source={require('../assets/images/sleep.png')} style={styles.buttonImage} />
+          <Image
+            source={require('../assets/images/sleep.png')}
+            style={styles.buttonImage}
+            contentFit="contain"
+          />
           <Text style={styles.buttonText}>SLEEP</Text>
         </TouchableOpacity>
 
@@ -39,11 +52,22 @@ export default function HomeScreen() {
           style={[styles.button, { backgroundColor: '#ffffba' }]}
           onPress={() => router.push('/mood')}
         >
-          <Image source={require('../assets/images/mood.png')} style={styles.buttonImage} />
+          <Image
+            source={require('../assets/images/mood.png')}
+            style={styles.buttonImage}
+            contentFit="contain"
+          />
           <Text style={styles.buttonText}>MOOD</Text>
         </TouchableOpacity>
 
       </View>
+
+      <Image
+        source={require('../assets/images/floppy_happy.gif')}
+        style={styles.mascot}
+        contentFit="contain"
+      />
+
     </View>
   )
 }
@@ -91,11 +115,15 @@ const styles = StyleSheet.create({
   buttonImage: {
     width: 64,
     height: 64,
-    resizeMode: 'contain',
   },
   buttonText: {
     fontFamily: 'PressStart2P_400Regular',
     fontSize: 10,
     color: '#2a3a5a',
+  },
+  mascot: {
+    width: 150,
+    height: 150,
+    marginTop: 32,
   },
 })

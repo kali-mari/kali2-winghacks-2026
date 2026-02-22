@@ -1,13 +1,54 @@
 import { router } from 'expo-router'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { useDeviceEntries } from '../hooks/useDeviceEntries'
+
+const MOOD_CONFIG: Record<string, { label: string; color: string; emoji: string }> = {
+  super_sad:    { label: 'Super Sad',    color: '#a8dadc', emoji: '▼' },
+  extra_angry:  { label: 'Extra Angry',  color: '#e63946', emoji: '!' },
+  only_okay:    { label: 'Only Okay',    color: '#ffd6a5', emoji: '—' },
+  comfy_cozy:   { label: 'Comfy Cozy',   color: '#caffbf', emoji: '♡' },
+  super_duper:  { label: 'Super Duper',  color: '#ffffba', emoji: '★' },
+  not_recorded: { label: 'No Data',      color: '#d0d0d0', emoji: '?' },
+}
 
 export default function MoodScreen() {
+  const { entries, loading } = useDeviceEntries(30)
+
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.backButton} onPress={() => router.push('/')}>
         <Text style={styles.backText}>← Back</Text>
       </TouchableOpacity>
+
       <Text style={styles.title}>MOOD</Text>
+
+      {loading ? (
+        <ActivityIndicator color="#e63946" style={{ marginTop: 40 }} />
+      ) : (
+        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+          <View style={styles.legend}>
+            {Object.entries(MOOD_CONFIG).map(([key, cfg]) => (
+              <View key={key} style={styles.legendItem}>
+                <View style={[styles.legendDot, { backgroundColor: cfg.color }]} />
+                <Text style={styles.legendText}>{cfg.label}</Text>
+              </View>
+            ))}
+          </View>
+
+          <View style={styles.grid}>
+            {entries.map((entry) => {
+              const cfg = MOOD_CONFIG[entry.mood] ?? MOOD_CONFIG.not_recorded
+              const date = entry.timestamp ? entry.timestamp.slice(5, 10) : '??'
+              return (
+                <View key={entry.id} style={[styles.cell, { backgroundColor: cfg.color }]}>
+                  <Text style={styles.cellEmoji}>{cfg.emoji}</Text>
+                  <Text style={styles.cellDate}>{date}</Text>
+                </View>
+              )
+            })}
+          </View>
+        </ScrollView>
+      )}
     </View>
   )
 }
@@ -38,7 +79,66 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: 'PressStart2P_400Regular',
-    fontSize: 16,
+    fontSize: 28,
     color: '#2a3a5a',
+    marginBottom: 24,
+  },
+  scroll: {
+    paddingHorizontal: 16,
+    paddingBottom: 40,
+    alignItems: 'center',
+  },
+  legend: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 8,
+    marginBottom: 20,
+    paddingHorizontal: 8,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  legendDot: {
+    width: 14,
+    height: 14,
+    borderWidth: 2,
+    borderColor: '#2a3a5a',
+  },
+  legendText: {
+    fontFamily: 'PressStart2P_400Regular',
+    fontSize: 8,
+    color: '#2a3a5a',
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    justifyContent: 'center',
+  },
+  cell: {
+    width: '30%',
+    aspectRatio: 1,
+    borderWidth: 3,
+    borderColor: '#2a3a5a',
+    borderRightWidth: 5,
+    borderBottomWidth: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 8,
+  },
+  cellEmoji: {
+    fontSize: 36,
+    color: '#2a3a5a',
+    textAlign: 'center',
+    lineHeight: 42,
+  },
+  cellDate: {
+    fontFamily: 'PressStart2P_400Regular',
+    fontSize: 5,
+    color: '#2a3a5a',
+    marginTop: 2,
   },
 })
