@@ -1,23 +1,20 @@
-import { Image } from 'expo-image'
-import { router } from 'expo-router'
-import React from 'react'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Image } from "expo-image";
+import { router } from "expo-router";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function HomeScreen() {
   return (
     <View style={styles.container}>
-
       <Text style={styles.title}>FlowFriend</Text>
       <Text style={styles.subtitle}>WITH YOUR CYCLE COMPANION, FLOPPY!</Text>
 
       <View style={styles.buttonGrid}>
-
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: '#ffffba' }]}
-          onPress={() => router.push('/flow')}
+          style={[styles.button, { backgroundColor: "#ffffba" }]}
+          onPress={() => router.push("/flow")}
         >
           <Image
-            source={require('../assets/images/flow.png')}
+            source={require("../assets/images/flow.png")}
             style={styles.buttonImage}
             contentFit="contain"
           />
@@ -25,11 +22,11 @@ export default function HomeScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: '#ffffba' }]}
-          onPress={() => router.push('/pain')}
+          style={[styles.button, { backgroundColor: "#ffffba" }]}
+          onPress={() => router.push("/pain")}
         >
           <Image
-            source={require('../assets/images/cramps.png')}
+            source={require("../assets/images/cramps.png")}
             style={styles.buttonImage}
             contentFit="contain"
           />
@@ -37,11 +34,11 @@ export default function HomeScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: '#ffffba' }]}
-          onPress={() => router.push('/sleep')}
+          style={[styles.button, { backgroundColor: "#ffffba" }]}
+          onPress={() => router.push("/sleep")}
         >
           <Image
-            source={require('../assets/images/sleep.png')}
+            source={require("../assets/images/sleep.png")}
             style={styles.buttonImage}
             contentFit="contain"
           />
@@ -49,81 +46,98 @@ export default function HomeScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: '#ffffba' }]}
-          onPress={() => router.push('/mood')}
+          style={[styles.button, { backgroundColor: "#ffffba" }]}
+          onPress={() => router.push("/mood")}
         >
           <Image
-            source={require('../assets/images/mood.png')}
+            source={require("../assets/images/mood.png")}
             style={styles.buttonImage}
             contentFit="contain"
           />
           <Text style={styles.buttonText}>MOOD</Text>
         </TouchableOpacity>
 
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: "#ffb3e6" }]}
+          onPress={() => router.push("/prediction")}
+        >
+          <Text style={styles.buttonEmoji}>🔮</Text>
+          <Text style={styles.buttonText}>PREDICT</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: "#c9f0dd" }]}
+          onPress={() => router.push("/chat")}
+        >
+          <Text style={styles.buttonEmoji}>💬</Text>
+          <Text style={styles.buttonText}>CHAT</Text>
+        </TouchableOpacity>
       </View>
 
       <Image
-        source={require('../assets/images/floppy_happy.gif')}
+        source={require("../assets/images/floppy_happy.gif")}
         style={styles.mascot}
         contentFit="contain"
       />
-
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#bae1ff',
-    alignItems: 'center',
+    backgroundColor: "#bae1ff",
+    alignItems: "center",
     paddingTop: 80,
     paddingHorizontal: 24,
   },
   title: {
-    fontFamily: 'PressStart2P_400Regular',
+    fontFamily: "PressStart2P_400Regular",
     fontSize: 24,
-    color: '#2a3a5a',
+    color: "#2a3a5a",
     marginBottom: 12,
-    textAlign: 'center',
+    textAlign: "center",
   },
   subtitle: {
-    fontFamily: 'Silkscreen_400Regular',
+    fontFamily: "Silkscreen_400Regular",
     fontSize: 13,
-    color: '#6a7a9a',
+    color: "#6a7a9a",
     letterSpacing: 3,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 24,
   },
   buttonGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 16,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   button: {
     width: 140,
     height: 140,
     borderWidth: 3,
-    borderColor: '#2a3a5a',
+    borderColor: "#2a3a5a",
     borderRightWidth: 5,
     borderBottomWidth: 5,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     gap: 12,
   },
   buttonImage: {
     width: 64,
     height: 64,
   },
+  buttonEmoji: {
+    fontSize: 48,
+  },
   buttonText: {
-    fontFamily: 'PressStart2P_400Regular',
+    fontFamily: "PressStart2P_400Regular",
     fontSize: 10,
-    color: '#2a3a5a',
+    color: "#2a3a5a",
   },
   mascot: {
     width: 150,
     height: 150,
     marginTop: 32,
   },
-})
+});

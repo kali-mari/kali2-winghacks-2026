@@ -1,41 +1,78 @@
-import { off, onValue, ref } from 'firebase/database'
-import { useEffect, useState } from 'react'
-import { rtdb } from '../firebase/config'
+import { onAuthStateChanged } from "firebase/auth";
+import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { auth, db } from "../firebase/config";
 
 export type Entry = {
-  id: string
-  flow: string
-  mood: string
-  pain: string
-  sleep: string
-  timestamp: string
-}
+  id: string;
+  flow: string;
+  mood: string;
+  pain: string;
+  sleep: string;
+  timestamp: string;
+};
 
 export const useDeviceEntries = (limit = 30) => {
-  const [entries, setEntries] = useState<Entry[]>([])
-  const [loading, setLoading] = useState(true)
+  const [entries, setEntries] = useState<Entry[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const deviceRef = ref(rtdb, '/')
-    onValue(deviceRef, (snapshot) => {
-      const data = snapshot.val()
-      if (data) {
-        const parsed: Entry[] = Object.entries(data).map(([id, val]: [string, any]) => ({
-          id,
-          flow: val.flow ?? 'not_recorded',
-          mood: val.mood ?? 'not_recorded',
-          pain: val.pain ?? 'not_recorded',
-          sleep: val.sleep ?? 'not_recorded',
-          timestamp: val.timestamp ?? '',
-        }))
-        // Sort by timestamp descending, take last `limit`
-        parsed.sort((a, b) => (b.timestamp > a.timestamp ? 1 : -1))
-        setEntries(parsed.slice(0, limit))
-      }
-      setLoading(false)
-    })
-    return () => off(deviceRef)
-  }, [limit])
+    let unsubscribeSnapshot: (() => void) | null = null;
 
-  return { entries, loading }
-}
+    // Listen for auth state changes
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (user?.uid) {
+        const entriesRef = collection(db, "users", user.uid, "entries");
+        const q = query(entriesRef, orderBy("date", "desc"));
+
+        unsubscribeSnapshot = onSnapshot(
+          q,
+          (snapshot) => {
+            const parsed: Entry[] = snapshot.docs.map((doc) => {
+              const data = doc.data();
+              let timestamp = "";
+
+              // Handle Firestore Timestamp
+              if (data.date?.toDate) {
+                // This is a Firestore Timestamp
+                const date = data.date.toDate();
+                timestamp = date.toISOString().split("T")[0]; // Extract just YYYY-MM-DD
+              } else if (typeof data.date === "string") {
+                // Already a string
+                timestamp = data.date;
+              } else if (data.date instanceof Date) {
+                // JavaScript Date
+                timestamp = data.date.toISOString().split("T")[0];
+              }
+
+              return {
+                id: doc.id,
+                flow: data.flow ?? "not_recorded",
+                mood: data.mood ?? "not_recorded",
+                pain: data.pain ?? "not_recorded",
+                sleep: data.sleep ?? "not_recorded",
+                timestamp,
+              };
+            });
+            setEntries(parsed.slice(0, limit));
+            setLoading(false);
+          },
+          (error) => {
+            console.error("Error loading entries:", error);
+            setLoading(false);
+          },
+        );
+      } else {
+        setLoading(false);
+        setEntries([]);
+      }
+    });
+
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeSnapshot) unsubscribeSnapshot();
+    };
+  }, [limit]);
+
+  return { entries, loading };
+};
