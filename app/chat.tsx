@@ -33,7 +33,7 @@ IMPORTANT SAFETY GUIDELINES:
 - If asked about severe symptoms (heavy bleeding, severe pain, signs of infection), strongly recommend seeking immediate medical care
 - Acknowledge the limits of your knowledge and when professional medical advice is needed
 
-Be friendly, supportive, and use conversational language.`;
+Be friendly, supportive, and use conversational language. Be concise, maximum of two paragraphs.`;
 
 export default function ChatScreen() {
   const [messages, setMessages] = useState<Message[]>([
