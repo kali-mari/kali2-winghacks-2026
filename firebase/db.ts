@@ -1,21 +1,21 @@
-import { signInAnonymously } from 'firebase/auth'; // ← correct import
-import { addDoc, collection, doc, getDoc, setDoc } from 'firebase/firestore'
+import { signInAnonymously } from 'firebase/auth'
+import { addDoc, collection, doc, getDoc, getDocs, orderBy, query, serverTimestamp, setDoc } from 'firebase/firestore'
 import { auth, db } from './config'
 
-// Call this when app loads — creates a silent account tied to the device
+/* INIT USER (ANON) */
 export const initUser = async () => {
   const { user } = await signInAnonymously(auth)
   return user.uid
 }
 
-// Get user profile
+/* GET USER */
 export const getUser = async (userId: string) => {
   const ref = doc(db, 'users', userId)
   const snap = await getDoc(ref)
   return snap.exists() ? snap.data() : null
 }
 
-// Create or update user profile
+/* SAVE USER */
 export const saveUser = async (userId: string, name: string) => {
   const ref = doc(db, 'users', userId)
   await setDoc(ref, {
@@ -24,7 +24,7 @@ export const saveUser = async (userId: string, name: string) => {
   }, { merge: true })
 }
 
-// Add a new entry
+/* ADD ENTRY */
 export const addEntry = async (userId: string, entry: {
   flow: number,
   mood: number,
@@ -34,6 +34,15 @@ export const addEntry = async (userId: string, entry: {
   const ref = collection(db, 'users', userId, 'entries')
   await addDoc(ref, {
     ...entry,
-    date: new Date(),
+    date: serverTimestamp(),
+    source: 'device',
   })
+}
+
+/* GET ENTRIES */
+export const getEntries = async (userId: string) => {
+  const ref = collection(db, 'users', userId, 'entries')
+  const q = query(ref, orderBy('date', 'desc'))
+  const snap = await getDocs(q)
+  return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
 }
