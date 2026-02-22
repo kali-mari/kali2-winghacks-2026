@@ -1,13 +1,13 @@
 import { router } from 'expo-router'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
-export default function SleepScreen() {
+export default function PainScreen() {
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.backButton} onPress={() => router.push('/')}>
         <Text style={styles.backText}>← Back</Text>
       </TouchableOpacity>
-      <Text style={styles.title}>SLEEP</Text>
+      <Text style={styles.title}>Pain</Text>
     </View>
   )
 }

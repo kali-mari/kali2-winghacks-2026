@@ -21,10 +21,10 @@ export default function HomeScreen() {
 
         <TouchableOpacity
           style={[styles.button, { backgroundColor: '#ffffba' }]}
-          onPress={() => router.push('/cramps')}
+          onPress={() => router.push('/pain')}
         >
           <Image source={require('../assets/images/cramps.png')} style={styles.buttonImage} />
-          <Text style={styles.buttonText}>CRAMPS</Text>
+          <Text style={styles.buttonText}>PAIN</Text>
         </TouchableOpacity>
 
         <TouchableOpacity

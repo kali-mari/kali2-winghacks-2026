@@ -25,17 +25,21 @@ export const saveUser = async (userId: string, name: string) => {
 }
 
 /* ADD ENTRY */
-export const addEntry = async (userId: string, entry: {
-  flow: number,
-  mood: number,
-  cramps: number,
-  sleep: number,
-}) => {
+export type Entry = {
+  flow?: 'none' | 'light_spotting' | 'moderate' | 'heavy' | 'extra_heavy' | null
+  sleep?: 'no_battery' | 'still_sleepy' | 'decent' | 'feeling_good' | 'fully_powered' | null
+  mood?: 'super_sad' | 'extra_angry' | 'only_okay' | 'comfy_cozy' | 'super_duper' | null
+  pain?: 'none' | 'back_pain' | 'stomach_cramps' | 'pelvic_pain' | 'headaches' | null
+}
+
+export const addEntry = async (userId: string, entry: Entry) => {
   const ref = collection(db, 'users', userId, 'entries')
   await addDoc(ref, {
-    ...entry,
+    flow: entry.flow ?? null,
+    sleep: entry.sleep ?? null,
+    mood: entry.mood ?? null,
+    pain: entry.pain ?? null,
     date: serverTimestamp(),
-    source: 'device',
   })
 }
 
